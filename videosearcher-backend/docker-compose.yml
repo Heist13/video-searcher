@@ -1,0 +1,33 @@
+services:
+  videosearcher_mongo:
+    image: mongo:7.0
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db_data/mongo_data:/data/db
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+    networks:
+      - common-net
+
+  videosearcher_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+        - "8000:8000"
+    depends_on:
+        - videosearcher_mongo
+    volumes:
+      - ./assets:/app/assets
+    networks:
+      - common-net
+
+networks:
+  common-net: { }
